@@ -71,13 +71,15 @@ module.exports = {
 
         var stream = fs.createReadStream(`./public/images/${fullFileName}`)
         // upload image to gcs,and generate corespond meta data(url )
-        const image_adapter = new ImageAdapter()
-        let _meta = await image_adapter.sync_save(stream, fullFileName)
+        const imageAdapter = new ImageAdapter(fullFileName)
+        await imageAdapter.uploadImages(stream)
 
-        resolvedData.urlOriginal = _meta.url.urlOriginal
-        resolvedData.urlDesktopSize = _meta.url.urlDesktopSize
-        resolvedData.urlMobileSize = _meta.url.urlMobileSize
-        resolvedData.urlTabletSize = _meta.url.urlTabletSize
+        const meta = imageAdapter.meta
+        console.log(meta)
+        resolvedData.urlOriginal = meta.url.urlOriginal
+        resolvedData.urlDesktopSize = meta.url.urlDesktopSize
+        resolvedData.urlMobileSize = meta.url.urlMobileSize
+        resolvedData.urlTabletSize = meta.url.urlTabletSize
 
         // existingItem = null
         // create image
@@ -88,7 +90,8 @@ module.exports = {
           // existingItem = true
           // update image
           // need to delete old image in gcs
-          await image_adapter.delete(existingItem.file.filename)
+          await imageAdapter.delete(existingItem.file.filename)
+
           console.log('deleted old one')
         }
         // // update stored filename
