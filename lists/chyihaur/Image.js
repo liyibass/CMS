@@ -1,6 +1,6 @@
 const { Text, Select, Relationship, File, Url } = require('@keystonejs/fields')
 const { atTracking, byTracking } = require('@keystonejs/list-plugins')
-const { ImageAdapter } = require('../lib/ImageAdapter')
+const { ImageAdapter } = require('../../lib/ImageAdapter')
 const fs = require('fs')
 
 const { LocalFileAdapter } = require('@keystonejs/file-adapters')
@@ -75,7 +75,6 @@ module.exports = {
         await imageAdapter.uploadImages(stream)
 
         const meta = imageAdapter.meta
-        console.log(meta)
         resolvedData.urlOriginal = meta.url.urlOriginal
         resolvedData.urlDesktopSize = meta.url.urlDesktopSize
         resolvedData.urlMobileSize = meta.url.urlMobileSize

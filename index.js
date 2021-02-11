@@ -13,6 +13,8 @@ const PROJECT_NAME = 'CMS'
 const adapterConfig = {
   mongoUri: mongoUri,
 }
+const { app } = require('./configs/config.js')
+const lists = require(`./lists/${app.project}`)
 
 const keystone = new Keystone({
   adapter: new Adapter(adapterConfig),
@@ -47,6 +49,11 @@ keystone.createList('User', {
   },
 })
 
+// create lists
+for (var name in lists) {
+  keystone.createList(name, lists[name])
+}
+
 const authStrategy = keystone.createAuthStrategy({
   type: PasswordAuthStrategy,
   list: 'User',
@@ -64,11 +71,3 @@ module.exports = {
     new StaticApp({ path: '/', src: 'public' }),
   ],
 }
-
-const TodoSchema = require('./lists/Todo')
-const PostSchema = require('./lists/Post')
-const ImageSchema = require('./lists/Image')
-
-keystone.createList('Todo', TodoSchema)
-keystone.createList('Post', PostSchema)
-keystone.createList('Image', ImageSchema)
