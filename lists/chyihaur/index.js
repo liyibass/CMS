@@ -3,4 +3,5 @@ module.exports = {
   Post: require('./Post'),
   Image: require('./Image'),
   Portfolio: require('./Portfolio'),
+  Tag: require('./Tag'),
 }

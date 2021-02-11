@@ -22,6 +22,11 @@ module.exports = {
       adapter: fileAdapter,
       isRequired: true,
     },
+    tag: {
+      label: '標籤',
+      type: Relationship,
+      ref: 'Tag',
+    },
     urlOriginal: {
       type: Url,
       access: {
