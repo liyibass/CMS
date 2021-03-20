@@ -7,17 +7,23 @@ const { StaticApp } = require('@keystonejs/app-static')
 
 const { createItems } = require('@keystonejs/server-side-graphql-client')
 
-const { admin, mongoUri } = require('./configs/config')
+const { app, admin, mongoUri, session } = require('./configs/config')
 const { MongooseAdapter: Adapter } = require('@keystonejs/adapter-mongoose')
-const PROJECT_NAME = 'CMS'
 const adapterConfig = {
   mongoUri: mongoUri,
 }
-const { app } = require('./configs/config.js')
 const lists = require(`./lists/${app.project}`)
 
 const keystone = new Keystone({
   adapter: new Adapter(adapterConfig),
+  cookie: {
+    secure:
+      session.secure === false ? false : process.env.NODE_ENV === 'production', // Defaults to true in production
+    maxAge: 1000 * 60 * 60 * 24 * 30, // 30 days
+    sameSite: false,
+  },
+  cookieSecret: session.cookieSecret,
+
   //   onConnect: async (keystone) => {
   //     await createItems({
   //       keystone,
@@ -64,7 +70,7 @@ module.exports = {
   apps: [
     new GraphQLApp(),
     new AdminUIApp({
-      name: PROJECT_NAME,
+      name: app.applicationName,
       enableDefaultRoute: true,
       authStrategy,
     }),

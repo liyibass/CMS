@@ -1,6 +1,9 @@
 const { Text, Select, Relationship, File, Url } = require('@keystonejs/fields')
 const { atTracking, byTracking } = require('@keystonejs/list-plugins')
 const { ImageAdapter } = require('../../lib/ImageAdapter')
+const {
+  distributeUrlsToResolvedData,
+} = require('../../lib/utils/distributeUrlsToResolvedData')
 const fs = require('fs')
 
 const { LocalFileAdapter } = require('@keystonejs/file-adapters')
@@ -70,32 +73,27 @@ module.exports = {
       if (typeof resolvedData.file !== 'undefined') {
         // resolvedData = true
         // when create or update newer image
-        let fullFileName = resolvedData.file.filename
-        let origFilename = resolvedData.file.originalFilename
-        var id = resolvedData.file.id
 
+        // fetch image's stream in public folder
+        let fullFileName = resolvedData.file.filename //image's name format: id-orgName.ext
         var stream = fs.createReadStream(`./public/images/${fullFileName}`)
+
         // upload image to gcs,and generate corespond meta data(url )
         const imageAdapter = new ImageAdapter(fullFileName)
         await imageAdapter.uploadImages(stream)
 
         const meta = imageAdapter.meta
-        resolvedData.urlOriginal = meta.url.urlOriginal
-        resolvedData.urlDesktopSize = meta.url.urlDesktopSize
-        resolvedData.urlMobileSize = meta.url.urlMobileSize
-        resolvedData.urlTabletSize = meta.url.urlTabletSize
+        distributeUrlsToResolvedData(resolvedData, meta)
 
-        // existingItem = null
-        // create image
+        // if existingItem = null, it means create-iamge
+        // do nothing
         if (typeof existingItem === 'undefined') {
           console.log('---create image---')
         } else {
           console.log('---update image---')
-          // existingItem = true
-          // update image
+          // existingItem = true, it means update image
           // need to delete old image in gcs
           await imageAdapter.delete(existingItem.file.filename)
-
           console.log('deleted old one')
         }
         // // update stored filename
@@ -103,7 +101,6 @@ module.exports = {
         // const newFilename = formatImagePath(resolvedData)
         // resolvedData.file.filename = newFilename
         // // resolvedData.file.filename = newFilename
-        // return { existingItem, resolvedData }
       } else {
         // resolvedData = false
         // image is no needed to update
